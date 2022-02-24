@@ -59,7 +59,7 @@ bmi_dataset = cbind(sample_name, bmi)
 d1 = as.data.frame(bmi_dataset)
 names(d1)[1] <- "Sample_Name"
 test <- na.omit(d1)
-dim(test) # here we loose half troponin records, this needs rewritten
+dim(test) # here we lose half troponin records, this needs rewritten
 #[1] 10201     5
 
 d1 <- left_join(test, target, by = "Sample_Name")
