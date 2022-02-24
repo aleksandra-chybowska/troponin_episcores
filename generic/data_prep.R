@@ -82,11 +82,12 @@ cat("\n#### Import pheno data:\n")
 cat("Before removing NA and reducing col no:\n")
 cat(paste("\t", dim(pheno)))
 
-pheno = pheno %>% left_join(target, by=c("id" = "Sample_Name"))
-pheno = pheno[,c("id", "ID", "sex.y", "age.y", "Batch", feature)]
-pheno = na.omit(pheno)
-names(pheno) = c("id", "sentrix_ID", "sex", "age", "batch", feature)
+# pheno = pheno %>% left_join(target, by=c("id" = "Sample_Name"))
+# pheno = pheno[,c("id", "ID", "sex.y", "age.y", "Batch", feature)]
+# pheno = na.omit(pheno)
+# names(pheno) = c("id", "sentrix_ID", "sex", "age", "batch", feature)
 
+pheno = na.omit(pheno)
 #Remove related from pheno too
 
 cat("After filtering:\n")
@@ -94,29 +95,19 @@ cat(paste("\t", dim(pheno)))
 
 pheno_train = list()
 for(train_ids in settings$train_identifiers) {
-  pheno_train[[train_ids]] = subset(pheno, startsWith(pheno$batch, train_ids))
+  pheno_train[[train_ids]] = subset(pheno, pheno$set == train_ids)
 }
 pheno_train = do.call("rbind", pheno_train)
-pheno_train = pheno_train[pheno_train$sentrix_ID %in% unrelated$ID,]
+pheno_train = pheno_train[pheno_train$Sample_Sentrix_ID %in% unrelated$ID,]
 
 cat("Train after filtering:\n")
 cat(paste("\t", dim(pheno_train)))
 
-pheno_train[[feature]] = scale(resid(lm(pheno_train[[feature]] ~ pheno_train$age + factor(pheno_train$sex), data=pheno_train, na.action="na.exclude")))
-#hist(pheno_train[[feature]])
-if (settings$transform_feature == 1) {
-  pheno_train[[feature]] = transform(pheno_train[[feature]])
-}
-
 pheno_test = list()
 for(test_ids in settings$test_identifiers) {
-  pheno_test[[test_ids]] = subset(pheno, startsWith(pheno$batch, test_ids))
+  pheno_test[[test_ids]] = subset(pheno, pheno$set == test_ids)
 }
-
 pheno_test = do.call("rbind", pheno_test)
-if (settings$transform_feature == 1) {
-  pheno_test[[feature]] = transform(pheno_test[[feature]])
-}
 cat("Test after filtering:\n")
 cat(paste("\t", dim(pheno_test)))
 
@@ -138,6 +129,12 @@ for(dataset in test_datasets) {
 }
 common <- Reduce(intersect, probes_wave)
 
+# for (dataset in train_datasets) {
+#   train[[dataset]] <- train[[dataset]][which(rownames(train[[dataset]]) %in% common),]
+# }
+# w3_w4 <- do.call("cbind", train)
+# saveRDS(w3_w4, "/Volumes/marioni-lab/Ola/Lab/Test_sets/w3_w4_local.rds")
+
 cat("Train+Test: Common CpGs:\n")
 cat(paste("\t", length(common)))
 
@@ -152,14 +149,14 @@ gc()
 for (dataset in train_datasets) {
   train[[dataset]] <- train[[dataset]][which(rownames(train[[dataset]]) %in% common),]
   train[[dataset]] <- train[[dataset]][which(rownames(train[[dataset]]) %in% common_array),]
-  train[[dataset]] <- train[[dataset]][,which(colnames(train[[dataset]]) %in% pheno_train$sentrix_ID)]
+  train[[dataset]] <- train[[dataset]][,which(colnames(train[[dataset]]) %in% pheno_train$Sample_Sentrix_ID)]
 }
 
 # Filter (also making sure sample in pheno file)
 for (dataset in test_datasets) {
   test[[dataset]] <- test[[dataset]][which(rownames(test[[dataset]]) %in% common),]
   test[[dataset]] <- test[[dataset]][which(rownames(test[[dataset]]) %in% common_array),]
-  test[[dataset]] <- test[[dataset]][,which(colnames(test[[dataset]]) %in% pheno_test$sentrix_ID)]
+  test[[dataset]] <- test[[dataset]][,which(colnames(test[[dataset]]) %in% pheno_test$Sample_Sentrix_ID)]
 }
 
 cat("\nKept only probes in EPIC array and those common to all waves.\n")
@@ -193,8 +190,7 @@ for (dataset in test_datasets) {
 ######################################################
 dataset = train_datasets[1]
 cols <- colnames(train[[dataset]])
-wave3=train[[dataset]]
-wave4=train[["wave4"]]
+
 for (dataset in train_datasets) {
   train[[dataset]] = m2beta(train[[dataset]])
   train[[dataset]] = na_mean(train[[dataset]])
@@ -233,18 +229,18 @@ rm(train)
 cat("\nRAM clean up...\n\n")
 gc()
 
-train_df <- train_df[match(pheno_train$sentrix_ID, rownames(train_df)),] # Match order of methylation table (x) and phenotype table (y) 
+train_df <- train_df[match(pheno_train$Sample_Sentrix_ID, rownames(train_df)),] # Match order of methylation table (x) and phenotype table (y) 
 cat("\nRAM clean up...\n\n")
 gc()
-identical(pheno_train$sentrix_ID, rownames(train_df))
+identical(pheno_train$Sample_Sentrix_ID, rownames(train_df))
 
 test_df = do.call("rbind", test)
 cat("\n#### Dimensions after fusing waves - test:\n")
 cat(paste("\t", dim(test_df), "\n"))
 rm(test)
 
-test_df <- test_df[match(pheno_test$sentrix_ID, rownames(test_df)),] # Match order of methylation table (x) and phenotype table (y) 
-identical(pheno_test$sentrix_ID, rownames(test_df))
+test_df <- test_df[match(pheno_test$Sample_Sentrix_ID, rownames(test_df)),] # Match order of methylation table (x) and phenotype table (y) 
+identical(pheno_test$Sample_Sentrix_ID, rownames(test_df))
 cat("\nRAM clean up...\n\n")
 gc()
 # > dim(train_df)
@@ -273,12 +269,12 @@ saveRDS(test_df, "/Volumes/marioni-lab/Ola/Lab/ASSIGN/EpiScores/total_cholestero
 
 # If external, export just external data without GS
 ######################################################
-
-(!is.null(opt$lbc)) {
-  pheno_noGS <- pheno[!(pheno$cohort %in% c("W1", "W3", "W4")),]
-  train_df <- train_df[rownames(train_df) %in% rownames(pheno_noGS),]
-  
-  cat("\nExporting prepped data for models (just external)...\n")
-  o_name_rds <- paste0(opt$out, "methylation_training_", opt$name, "_noGS.rds")
-  saveRDS(train_df, o_name_rds, compress = FALSE)
-}
+# 
+# (!is.null(opt$lbc)) {
+#   pheno_noGS <- pheno[!(pheno$cohort %in% c("W1", "W3", "W4")),]
+#   train_df <- train_df[rownames(train_df) %in% rownames(pheno_noGS),]
+#   
+#   cat("\nExporting prepped data for models (just external)...\n")
+#   o_name_rds <- paste0(opt$out, "methylation_training_", opt$name, "_noGS.rds")
+#   saveRDS(train_df, o_name_rds, compress = FALSE)
+# }

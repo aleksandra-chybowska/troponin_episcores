@@ -19,7 +19,7 @@
   "target": "/Volumes/marioni-lab/Ola/Lab/Test_sets/gs20ktargets.tsv",
   "epic": "/Volumes/marioni-lab/Ola/Lab/Test_sets/EPIC_AnnotationObject_df.rds",
   "cpg_subset": "/Volumes/marioni-lab/Ola/Lab/Test_sets/Unique_W3_W4_and_W1.csv",
-  "pheno": "/Volumes/marioni-lab/Ola/Lab/ASSIGN/GS_assign_data.csv",
+  "pheno": "/Volumes/marioni-lab/Ola/Lab/EpiScores/pheno/total_cholesterol.csv",
   "feature": "total_cholesterol",
   "transform_feature": 0,
 
