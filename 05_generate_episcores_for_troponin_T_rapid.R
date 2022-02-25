@@ -12,9 +12,9 @@ transform <- function(x) {
   return(transformed)
 }
 
-xtrain = readRDS("/Cluster_Filespace/Marioni_Group/GS/GS_methylation/wave3_mvals.rds")
+xtrain = readRDS("/Volumes/marioni-lab/Ola/Lab/Test_sets/w3_w4_local.rds")
 # wave 1
-xtest = readRDS("/Cluster_Filespace/Marioni_Group/GS/GS_methylation/norm_mvals_5087.rds")
+xtest = readRDS("/Volumes/marioni-lab/Ola/Lab/Test_sets/w1_mvals.rds")
 
 dim(xtrain)
 dim(xtest)
@@ -25,7 +25,7 @@ xtest <- xtest[which(rownames(xtest) %in% rownames(xtrain)),]
 dim(xtrain)
 dim(xtest)
 
-anno <- readRDS("/Cluster_Filespace/Marioni_Group/Daniel/EPIC_AnnotationObject_df.rds")
+anno <- readRDS("/Volumes/marioni-lab/Ola/Lab/Test_sets/EPIC_AnnotationObject_df.rds")
 common_anno <- anno[which(anno$Methyl450_Loci == "TRUE"),]
 
 xtrain <- xtrain[rownames(xtrain) %in% rownames(common_anno),]
@@ -37,42 +37,51 @@ dim(xtest)
 #phenotypic (biomarker + patient data)
 #changed!
 #d1 = read.csv("/Cluster_Filespace/Marioni_Group/GS/GS_dataset/clinical/body.csv")
-d1 <- read.delim("/Cluster_Filespace/Marioni_Group/Ola/GS_added_biomarkers/GS20K_Troponin_all.PHE")
 
-names(d1)[1] <- "Sample_Name"
 
-target <- readRDS("/Cluster_Filespace/Marioni_Group/GS/GS_methylation/GS10k_Targets.rds")
 
-table(is.na(d1$bmi))
-# FALSE  TRUE 
-# 10201  9831 
+# d1 <- read.delim("/Cluster_Filespace/Marioni_Group/Ola/GS_added_biomarkers/GS20K_Troponin_all.PHE")
+# 
+# names(d1)[1] <- "Sample_Name"
+# 
+# target <- readRDS("/Cluster_Filespace/Marioni_Group/GS/GS_methylation/GS10k_Targets.rds")
+# 
+# table(is.na(d1$bmi))
+# # FALSE  TRUE 
+# # 10201  9831 
+# 
+# #table(is.na(d1$Troponin_I))
+# # FALSE  TRUE 
+# sample_name = d1$Sample_Name
+# 
+# #changed!
+# #bmi = d1$bmi 
+# bmi = d1$Troponin_T
+# 
+# bmi_dataset = cbind(sample_name, bmi)
+# d1 = as.data.frame(bmi_dataset)
+# names(d1)[1] <- "Sample_Name"
+# test <- na.omit(d1)
+# dim(test) # here we lose half troponin records, this needs rewritten
+# #[1] 10201     5
+# 
+# d1 <- left_join(test, target, by = "Sample_Name")
+# test2 <- na.omit(d1)
 
-#table(is.na(d1$Troponin_I))
-# FALSE  TRUE 
-sample_name = d1$Sample_Name
+test2 = read.csv('/Volumes/marioni-lab/Ola/Lab/EpiScores/pheno/total_cholesterol.csv')
 
-#changed!
-#bmi = d1$bmi 
-bmi = d1$Troponin_T
-
-bmi_dataset = cbind(sample_name, bmi)
-d1 = as.data.frame(bmi_dataset)
-names(d1)[1] <- "Sample_Name"
-test <- na.omit(d1)
-dim(test) # here we lose half troponin records, this needs rewritten
-#[1] 10201     5
-
-d1 <- left_join(test, target, by = "Sample_Name")
-test2 <- na.omit(d1)
 # 5338   17 ! Only 5330 rows left with phenotypic data. Bit less than what Danni had.
 #write.csv(test2, "/Users/shirin/Documents/Edinburgh/Lab/Troponin/yfile_all_troponin_DNAm_5338.csv", row.names = F)
 
-W1 <- test2[which(test2$Set == "W1"),]
-W3 <- test2[which(test2$Set == "W3"),]
+W3 <- subset(test2, test2$set == "W3" | test2$set == "W4")
+W1 <- test2[which(test2$set == "W1"),]
 dim(W1) #2779   17
-# [1] 2779   17
 dim(W3) #2559   17
-# [1] 2559   17
+
+# > dim(W1)
+# [1] 5070    6
+# > dim(W3)
+# [1] 13258     6
 
 # write.csv(W1, "/Users/shirin/Documents/Edinburgh/Lab/Troponin/yfile_W1_DNAm_2779.csv", row.names = F)
 # write.csv(W3, "/Users/shirin/Documents/Edinburgh/Lab/Troponin/yfile_W3_DNAm_2559.csv", row.names = F)
@@ -86,20 +95,18 @@ xte <- t(xtest)
 # Now subset the respective waves of GS by the phenotype data present in this file (Sample_Sentrix_IDs for matching to DNAm data)
 xtrain_sub <- xtr[which(rownames(xtr) %in% W3$Sample_Sentrix_ID),]
 xtest_sub <- xte[which(rownames(xte) %in% W1$Sample_Sentrix_ID),]
-
-# Number of people is now the same across test and train files 
 # > dim(xtrain_sub)
-# [1]   2559 398422
+# [1] 9815  713
 # > dim(xtest_sub)
-# [1]   2779 398422
-# > dim(W3)
-# [1] 2559   17
-# > dim(W1)
-# [1] 2779   17
+# [1] 5046  713
 
 # Match order of x files to y files 
 xtrain_sub <- xtrain_sub[match(W3$Sample_Sentrix_ID, rownames(xtrain_sub)),]
 xtest_sub <- xtest_sub[match(W1$Sample_Sentrix_ID, rownames(xtest_sub)),]
+# > dim(xtest_sub)
+# [1] 5070  713
+# > dim(xtrain_sub)
+# [1] 13258   713
 
 m <- xtrain_sub
 m <- m2beta(m)
@@ -122,7 +129,7 @@ xtest <- scaled
 
 
 # Regress ytrain file by age/sex/PCs and select y protein data in each case. W3 - test
-list <- c(2)
+list <- c(6)
 for(i in list) {
   W3[,i] <- scale(resid(lm(W3[,i] ~ W3$age + factor(W3$sex), data=W3, na.action="na.exclude")))
 }
@@ -141,7 +148,7 @@ W1 <- W1[c(3,2)]
 W3 <- W3[c(3,2)]
 
 identical(W1$Sample_Sentrix_ID, rownames(xtest)) # TRUE
-identical(W3$Sample_Sentrix_ID, rownames(xtrain)) # TRUE
+identical(W3$Sample_Sentrix_ID, rownames(xtrain)) # TRUE -- FALSE FOR NEW DATASET, need to remove records from pheno so that it matches!
 
 # 
 # write.csv(W3, "/Cluster_Filespace/Marioni_Group/Ola/GS_added_biomarkers/elnets/inputs/bmi_ytrain_W3_file.csv", row.names = F) #troponins for W3

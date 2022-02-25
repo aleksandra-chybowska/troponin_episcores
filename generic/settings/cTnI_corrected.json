@@ -1,0 +1,30 @@
+{
+  "##_COMMENT1": "Local. cpg_subset used to filter out related individuals",
+  
+  "train": {
+    "wave3": "/Cluster_Filespace/Marioni_Group/GS/GS_methylation/wave3_mvals.rds",
+    "wave4": "/Volumes/marioni-lab/Ola/Lab/Test_sets/w4-1kcpgs-mvals.rds"
+  },
+  "test": {
+    "wave1": "/Cluster_Filespace/Marioni_Group/GS/GS_methylation/norm_mvals_5087.rds"
+  },
+  "train_identifiers": [
+    "W3",
+    "W4"
+  ],
+  "test_identifiers": [
+    "W1"
+  ],
+
+  "transform_test": "rank",
+  "target": "/Volumes/marioni-lab/Ola/Lab/Test_sets/gs20ktargets.tsv",
+  "epic": "/Cluster_Filespace/Marioni_Group/Daniel/EPIC_AnnotationObject_df.rds",
+  "cpg_subset": "/Volumes/marioni-lab/Ola/Lab/Test_sets/Unique_W3_W4_and_W1.csv",
+  "pheno": "/Cluster_Filespace/Marioni_Group/Ola/EpiScores/ASSIGN/pheno/cTnI_corrected.csv",
+  "feature": "cTnI_corrected",
+
+  "o_pheno_train": "/Cluster_Filespace/Marioni_Group/Ola/EpiScores/ASSIGN/train/cluster_cTnI_corrected_pheno_train.csv",
+  "o_pheno_test": "/Cluster_Filespace/Marioni_Group/Ola/EpiScores/ASSIGN/train/cluster_cTnI_corrected_pheno_test.csv",
+  "o_train_df": "/Cluster_Filespace/Marioni_Group/Ola/EpiScores/ASSIGN/train/cluster_cTnI_corrected_train_df.rds",
+  "o_test_df": "/Cluster_Filespace/Marioni_Group/Ola/EpiScores/ASSIGN/train/cluster_cTnI_corrected_test_df.rds"
+}

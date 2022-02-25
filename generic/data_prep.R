@@ -16,13 +16,16 @@ option_list = list(
 opt_parser = OptionParser(option_list=option_list);
 opt = parse_args(opt_parser);
 
-url = '/Users/shirin/Projects/R/troponin_episcores/generic/settings_local.json'
+url = '/Users/shirin/Projects/R/troponin_episcores/generic/settings/test_settings/settings_local.json'
 
-if (!is.null(opt$epic)) {
+if (!is.null(opt$settings)) {
   url = opt$settings
 }
 
 settings <- fromJSON(txt=url, flatten = FALSE)
+
+cat(settings$transform_test)
+quit()
 
 cat("\n#### Dimensions - test:\n")
 test = list()
@@ -107,7 +110,23 @@ pheno_test = list()
 for(test_ids in settings$test_identifiers) {
   pheno_test[[test_ids]] = subset(pheno, pheno$set == test_ids)
 }
+
+#SPRAWDZIC!
 pheno_test = do.call("rbind", pheno_test)
+
+if (settings$transform_test == "log") {
+  cat("Log transforming test!")
+  pheno_test[feature] = log(pheno_test[feature])
+} 
+if (settings$transform_test == "log+1") {
+  cat("Log+1 transforming test!")
+  pheno_test[feature] = log(pheno_test[feature]+1)
+}
+if (settings$transform_test == "rank") {
+  cat("Rank transforming test!")
+  pheno_test[feature] = transform(pheno_test[feature]+1)
+}
+
 cat("Test after filtering:\n")
 cat(paste("\t", dim(pheno_test)))
 
@@ -261,10 +280,10 @@ o_name_rds <- paste0(opt$out, "methylation_training_", opt$name, ".rds")
 saveRDS(train_df, o_name_rds, compress = FALSE)
 
 # 
-write.csv(pheno_train, "/Volumes/marioni-lab/Ola/Lab/ASSIGN/EpiScores/total_cholesterol/train/local_total_cholesterol_pheno_train.csv", row.names = F) #troponins for W3
-write.csv(pheno_test, "/Volumes/marioni-lab/Ola/Lab/ASSIGN/EpiScores/total_cholesterol/train/loacl_total_cholesterol_pheno_test.csv", row.names = F) #troponins for W1
-saveRDS(train_df, "/Volumes/marioni-lab/Ola/Lab/ASSIGN/EpiScores/total_cholesterol/train/local_total_cholesterol_train_df.rds") # cpgs W3
-saveRDS(test_df, "/Volumes/marioni-lab/Ola/Lab/ASSIGN/EpiScores/total_cholesterol/train/local_total_cholesterol_test_df.rds") # cpgs
+write.csv(pheno_train, settings$o_pheno_train, row.names = F) #troponins for W3
+write.csv(pheno_test, settings$o_pheno_test, row.names = F) #troponins for W1
+saveRDS(train_df, settings$o_train_df) # cpgs W3
+saveRDS(test_df, settings$o_test_df) # cpgs
 
 
 # If external, export just external data without GS
