@@ -24,9 +24,6 @@ if (!is.null(opt$settings)) {
 
 settings <- fromJSON(txt=url, flatten = FALSE)
 
-cat(settings$transform_test)
-quit()
-
 cat("\n#### Dimensions - test:\n")
 test = list()
 test_datasets = names(settings$test)
@@ -113,20 +110,6 @@ for(test_ids in settings$test_identifiers) {
 
 #SPRAWDZIC!
 pheno_test = do.call("rbind", pheno_test)
-
-if (settings$transform_test == "log") {
-  cat("Log transforming test!")
-  pheno_test[feature] = log(pheno_test[feature])
-} 
-if (settings$transform_test == "log+1") {
-  cat("Log+1 transforming test!")
-  pheno_test[feature] = log(pheno_test[feature]+1)
-}
-if (settings$transform_test == "rank") {
-  cat("Rank transforming test!")
-  pheno_test[feature] = transform(pheno_test[feature]+1)
-}
-
 cat("Test after filtering:\n")
 cat(paste("\t", dim(pheno_test)))
 

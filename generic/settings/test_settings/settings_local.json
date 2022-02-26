@@ -16,7 +16,6 @@
     "W1"
   ],
 
-
   "transform_test": "log",
   "target": "/Volumes/marioni-lab/Ola/Lab/Test_sets/gs20ktargets.tsv",
   "epic": "/Volumes/marioni-lab/Ola/Lab/Test_sets/EPIC_AnnotationObject_df.rds",
