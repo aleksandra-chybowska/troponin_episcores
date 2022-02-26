@@ -3,7 +3,7 @@
   
   "train": {
     "wave3": "/Cluster_Filespace/Marioni_Group/GS/GS_methylation/wave3_mvals.rds",
-    "wave4": "/Volumes/marioni-lab/Ola/Lab/Test_sets/w4-1kcpgs-mvals.rds"
+    "wave4": "/Cluster_Filespace/Marioni_Group/GS/GS_methylation/wave4/w4-mvals.rds"
   },
   "test": {
     "wave1": "/Cluster_Filespace/Marioni_Group/GS/GS_methylation/norm_mvals_5087.rds"
@@ -15,11 +15,10 @@
   "test_identifiers": [
     "W1"
   ],
-
-  "transform_test": "log+1",
-  "target": "/Volumes/marioni-lab/Ola/Lab/Test_sets/gs20ktargets.tsv",
+  "transform_test": "no",
+  "target": "/Cluster_Filespace/Marioni_Group/Ola/Data/gs20ktargets.tsv",
   "epic": "/Cluster_Filespace/Marioni_Group/Daniel/EPIC_AnnotationObject_df.rds",
-  "cpg_subset": "/Volumes/marioni-lab/Ola/Lab/Test_sets/Unique_W3_W4_and_W1.csv",
+  "cpg_subset": "/Cluster_Filespace/Marioni_Group/Ola/EpiScores/Unique_W3_W4_and_W1.csv",
   "pheno": "/Cluster_Filespace/Marioni_Group/Ola/EpiScores/ASSIGN/pheno/pack_years.csv",
   "feature": "pack_years",
 
