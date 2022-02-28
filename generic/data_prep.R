@@ -259,14 +259,14 @@ gc()
 ######################################################
 
 cat("\nExporting prepped data for models...\n")
-o_name_rds <- paste0(opt$out, "methylation_training_", opt$name, ".rds")
-saveRDS(train_df, o_name_rds, compress = FALSE)
+# o_name_rds <- paste0(opt$out, "methylation_training_", opt$name, ".rds")
+# saveRDS(train_df, o_name_rds, compress = FALSE)
 
 # 
 write.csv(pheno_train, settings$o_pheno_train, row.names = F) #troponins for W3
 write.csv(pheno_test, settings$o_pheno_test, row.names = F) #troponins for W1
-saveRDS(train_df, settings$o_train_df) # cpgs W3
-saveRDS(test_df, settings$o_test_df) # cpgs
+saveRDS(train_df, settings$o_train_df, compress = FALSE) # cpgs W3
+saveRDS(test_df, settings$o_test_df, compress = FALSE) # cpgs
 
 
 # If external, export just external data without GS

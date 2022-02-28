@@ -6,13 +6,14 @@ trainEpiScores() {
 
     for TRAIT in $SETTINGS/*
     do
-        echo "\nTrait: $TRAIT"
+        echo "Trait: $TRAIT"
         
-        Rscript --vanilla /Users/shirin/Projects/R/troponin_episcores/generic/data_prep.R --settings $TRAIT
+        Rscript --vanilla /Cluster_Filespace/Marioni_Group/Ola/Code/troponin_episcores/generic/data_prep.R --settings $TRAIT
         # Rscript --vanilla ~/Cluster_Filespace/Marioni_Group/Ola/Code/troponin_episcores/generic/data_prep.R --settings $TRAIT
+		echo "Finished, check output size"
     done
 
-    echo "\nProcedure finished."
+    echo "Procedure finished."
 }
 
-trainEpiScores /Users/shirin/Projects/R/troponin_episcores/generic/settings/test_settings
+trainEpiScores /Cluster_Filespace/Marioni_Group/Ola/Code/troponin_episcores/generic/settings
