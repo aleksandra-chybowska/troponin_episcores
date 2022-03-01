@@ -33,7 +33,7 @@ if (!is.null(opt$settings)) {
 }
 
 settings <- fromJSON(txt=url, flatten = FALSE)
-sink(settings$log_train)
+sink(settings$log_train, split=TRUE)
 
 set.seed(1234) # Set seed to ensure fold variation minimised 
 seed <- 1234
