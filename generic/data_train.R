@@ -277,11 +277,11 @@ gc()
 
 cat("\nFitting elastic net model for age...\n")
 cat("\nMode selected: randomized folds.\n")
-cvfit <- cv.biglasso(x, y, family = 'gaussian', seed = seed, alpha = alpha, ncores = 1, nfolds = nfolds, penalty = penalty)
+cvfit <- cv.biglasso(x, y, family = 'gaussian', seed = seed, alpha = alpha, ncores = 8, nfolds = nfolds, penalty = penalty)
 
 lambda <- cvfit$lambda.min # Get lambda which gives minimum MSE
 # Obtain coeffs
-fit <- biglasso(x, y, family = "gaussian", alpha = alpha, ncores = 1, lambda = lambda, penalty = penalty)
+fit <- biglasso(x, y, family = "gaussian", alpha = alpha, ncores = 8, lambda = lambda, penalty = penalty)
 cat("\nRAM clean up...\n\n")
 gc()
 

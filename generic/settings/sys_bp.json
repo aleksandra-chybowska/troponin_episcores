@@ -25,5 +25,12 @@
   "o_pheno_train": "/Cluster_Filespace/Marioni_Group/Ola/EpiScores/ASSIGN/train/cluster_sys_bp_pheno_train.csv",
   "o_pheno_test": "/Cluster_Filespace/Marioni_Group/Ola/EpiScores/ASSIGN/train/cluster_sys_bp_pheno_test.csv",
   "o_train_df": "/Cluster_Filespace/Marioni_Group/Ola/EpiScores/ASSIGN/train/cluster_sys_bp_train_df.rds",
-  "o_test_df": "/Cluster_Filespace/Marioni_Group/Ola/EpiScores/ASSIGN/train/cluster_sys_bp_test_df.rds"
+  "o_test_df": "/Cluster_Filespace/Marioni_Group/Ola/EpiScores/ASSIGN/train/cluster_sys_bp_test_df.rds",
+  "log_prep": "/Cluster_Filespace/Marioni_Group/Ola/EpiScores/ASSIGN/train/cluster_sys_bp_log_prep.txt",
+  "log_train": "/Cluster_Filespace/Marioni_Group/Ola/EpiScores/ASSIGN/train/cluster_sys_bp_log_train.txt",
+
+  "##_COMMENT2": "Training",
+
+  "lasso": "no",
+  "o_dir": "/Cluster_Filespace/Marioni_Group/Ola/EpiScores/ASSIGN/test/"
 }
