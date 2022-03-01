@@ -23,6 +23,7 @@ if (!is.null(opt$settings)) {
 }
 
 settings <- fromJSON(txt=url, flatten = FALSE)
+sink(settings$log_prep, split=TRUE)
 
 cat("\n#### Dimensions - test:\n")
 test = list()
@@ -110,6 +111,7 @@ for(test_ids in settings$test_identifiers) {
 
 #SPRAWDZIC!
 pheno_test = do.call("rbind", pheno_test)
+
 cat("Test after filtering:\n")
 cat(paste("\t", dim(pheno_test)))
 
@@ -259,8 +261,6 @@ gc()
 ######################################################
 
 cat("\nExporting prepped data for models...\n")
-# o_name_rds <- paste0(opt$out, "methylation_training_", opt$name, ".rds")
-# saveRDS(train_df, o_name_rds, compress = FALSE)
 
 # 
 write.csv(pheno_train, settings$o_pheno_train, row.names = F) #troponins for W3
@@ -268,15 +268,5 @@ write.csv(pheno_test, settings$o_pheno_test, row.names = F) #troponins for W1
 saveRDS(train_df, settings$o_train_df, compress = FALSE) # cpgs W3
 saveRDS(test_df, settings$o_test_df, compress = FALSE) # cpgs
 
+sink()
 
-# If external, export just external data without GS
-######################################################
-# 
-# (!is.null(opt$lbc)) {
-#   pheno_noGS <- pheno[!(pheno$cohort %in% c("W1", "W3", "W4")),]
-#   train_df <- train_df[rownames(train_df) %in% rownames(pheno_noGS),]
-#   
-#   cat("\nExporting prepped data for models (just external)...\n")
-#   o_name_rds <- paste0(opt$out, "methylation_training_", opt$name, "_noGS.rds")
-#   saveRDS(train_df, o_name_rds, compress = FALSE)
-# }

@@ -1,6 +1,7 @@
 ### outlier removal - lifted from https://github.com/davebraze/FDB1/blob/master/R/outliers.R ###
 library(kinship2)
 library(coxme)
+library(readxl)
 
 outlierID <- function(x, cut=4) {
   xx <- scale(x)
@@ -72,13 +73,12 @@ all_merged = agesex %>%
   left_join(smoking_PCQ, c("id" = "id")) %>%
   left_join(smid, c("id" = "id")) %>%
   left_join(disease, c("id" = "ID")) %>%
-  left_join(ra, c("id" = "id")) %>%
   left_join(bp_medicines, c("id" = "ID"))
+
 
 all_merged[which(is.na(all_merged$bp)), "bp"] = 0
 all_merged$rank = all_merged$rank / 100
 all_merged$diabetic = ifelse(!is.na(all_merged$tname), 1, 0)
-all_merged$ra = ifelse(!is.na(all_merged$section), 1, 0)
 all_merged$history_CVD = ifelse(all_merged$heart_disease_M | all_merged$heart_disease_F | all_merged$heart_disease_B | all_merged$heart_disease_S |
                                   all_merged$stroke_M | all_merged$stroke_F | all_merged$stroke_B | all_merged$stroke_S, 1, 0)
 all_merged$sex.x <- factor(all_merged$sex.x, levels=c('F','M'), labels=c(0, 1))
@@ -93,23 +93,33 @@ cox = all_merged[c(
   "diabetic",
   "pack_years",
   "avg_sys",
-  "ra",
   "Total_cholesterol",
   "HDL_cholesterol",
   "bp",
   "bmi"
 )]
 
+# [1]  0 14
+
 names(cox) = c("id", "Troponin_T", "Troponin_I", "cTnI_corrected", "simd", "history_cvd", "diabetic",
-               "pack_years", "sys_bp", "ra", "total_cholesterol", "HDL_cholesterol", "bp_medicines", "bmi")
+               "pack_years", "sys_bp", "total_cholesterol", "HDL_cholesterol", "bp_medicines", "bmi")
+dim(subset(cox, duplicated(cox$id)))
+# [1]  0 14
 
 ### load in target file and merge ###
 tar = read.csv("/Volumes/marioni-lab/Ola/Lab/Test_sets/gs20ktargets.tsv", sep='\t')
+dim(tar)
+# [1] 18414     6
+tar2 = subset(tar, duplicated(tar$Sample_Sentrix_ID))
+dim(tar2)
+# [1] 0 6
 
 cox <- merge(cox, tar, by.x="id", by.y="Sample_Name")
+dim(subset(cox, duplicated(cox$id)))
+# [1]  0 14
 
 par(mfrow=c(3,5))
-for(i in c(2:14)){
+for(i in c(2:13)){
   title <- names(cox)[i]
   hist(cox[,i], breaks=100, main=title)
 }
@@ -129,20 +139,14 @@ cox = cox[c(
   "bmi",
   "Set"
 )]
+dim(subset(cox, duplicated(cox$ID)))
+# [1]  0 13
 
-names(cox) = c("id", 
-               "Sample_Sentrix_ID", 
-               "age", 
-               "sex", 
-               "Troponin_T", 
-               "Troponin_I", 
-               "cTnI_corrected", 
-               "pack_years",
-               "sys_bp",
-               "total_cholesterol",
-               "HDL_cholesterol",
-               "bmi",
-               "set")
+#duplicates created here
+names(cox)[2] = "Sample_Sentrix_ID"
+dim(subset(cox, duplicated(cox$Sample_Sentrix_ID)))
+# [1] 56 13
+
 
 ### recode outliers to NA ###
 episcores = cox
