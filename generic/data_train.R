@@ -26,13 +26,17 @@ option_list = list(
 opt_parser = OptionParser(option_list=option_list);
 opt = parse_args(opt_parser);
 
-url = '/Cluster_Filespace/Marioni_Group/Ola/Code/troponin_episcores/generic/settings/sys_bp.json'
+#url = '/Cluster_Filespace/Marioni_Group/Ola/Code/troponin_episcores/generic/settings/sys_bp.json'
+url = '/Users/shirin/Projects/R/troponin_episcores/generic/settings/test_settings/settings_local.json'
 
 if (!is.null(opt$settings)) {
   url = opt$settings
 }
 
 settings <- fromJSON(txt=url, flatten = FALSE)
+
+sink(settings$log_train, split=TRUE)
+
 
 set.seed(1234) # Set seed to ensure fold variation minimised 
 seed <- 1234
@@ -157,9 +161,6 @@ cbindBM_list <- function(x, binding="right",
 }
 
 lasso <- settings$lasso
-
-
-
 
 pheno = read.csv(settings$o_pheno_train)
 pheno = subset(pheno, !duplicated(pheno$Sample_Sentrix_ID))
@@ -308,4 +309,6 @@ cat("\nExporting!\n\n")
 filename <- paste0(settings$o_dir, "elnet_coefficients_", settings$feature, ".csv")
 #filename <- "/Cluster_Filespace/Marioni_Group/Elena/epigenetic_clocks/chronological_age/elasticnet_models/elnet_train/w1w3w4/random_noscalesample_noscalecpg_subset20K/elnet_coefficients_random_noscalesample_noscalecpg_subset20K_squaredsubset900.tsv"
 write.csv(coefs, file = filename, row.names = FALSE)
+
+sink()
 
