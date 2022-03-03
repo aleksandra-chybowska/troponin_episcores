@@ -32,4 +32,19 @@ trainEpiScores() {
     echo "Procedure finished."
 }
 
-trainEpiScores /Cluster_Filespace/Marioni_Group/Ola/Code/troponin_episcores/generic/settings
+testEpiScores() {
+    echo "Calculate EpiScores for a set of traits - models - procedure begins"
+    SETTINGS=$1
+
+    for TRAIT in $SETTINGS/*
+    do
+        echo "Trait: $TRAIT"
+        
+        Rscript --vanilla /Cluster_Filespace/Marioni_Group/Ola/Code/troponin_episcores/generic/data_test.R --settings $TRAIT
+		echo "Finished, check output size"
+    done
+
+    echo "Procedure finished."
+}
+
+testEpiScores /Cluster_Filespace/Marioni_Group/Ola/Code/troponin_episcores/generic/settings
