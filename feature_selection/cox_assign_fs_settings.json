@@ -1,0 +1,6 @@
+{
+  "##_COMMENT1": "Input - prepped file with EpiScores, ASSIGN, sex, age, as well as time to event",
+  "input": "/Volumes/marioni-lab/Ola/Lab/EpiScores/Improving_assign/ASSIGN_and_Episcores_20k.csv",
+  "output": "/Volumes/marioni-lab/Ola/Lab/EpiScores/Improving_assign/",
+  "run": "protein_episcores"
+}
