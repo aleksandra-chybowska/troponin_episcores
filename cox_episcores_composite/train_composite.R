@@ -19,7 +19,7 @@ option_list = list(
 opt_parser = OptionParser(option_list=option_list);
 opt = parse_args(opt_parser);
 
-url = '/Volumes/marioni-lab/Ola/Lab/EpiScores/Cox_episcores_composite/composite_cox_settings.json'
+url = '/Volumes/marioni-lab/Ola/Lab/EpiScores/Cox_episcores_composite/train/composite_cox_settings.json'
 
 if (!is.null(opt$settings)) {
   url = opt$settings
