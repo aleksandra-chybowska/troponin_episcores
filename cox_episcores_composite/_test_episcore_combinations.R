@@ -22,7 +22,7 @@ option_list = list(
 opt_parser = OptionParser(option_list=option_list);
 opt = parse_args(opt_parser);
 
-url = '/Volumes/marioni-lab/Ola/Lab/EpiScores/Cox_episcores_composite/runs/episcores_only_13k_na_corrected/test/test_composite_settings.json'
+url = '/Volumes/marioni-lab/Ola/Lab/EpiScores/Cox_episcores_composite/runs/episcores_only_13k/5_most_significant/test_composite_settings.json'
 
 if (!is.null(opt$settings)) {
   url = opt$settings
@@ -33,13 +33,15 @@ settings
 # Import + prep data
 ######################################################
 
-set.seed(42) # Set seed to ensure fold variation minimised 
-seed <- 42
+set.seed(1234) # Set seed to ensure fold variation minimised 
+seed <- 1234
 
 # folds <- read.delim(opt$folds, header = TRUE, row.names = 2)
 df <- read.csv(settings$input, check.names = FALSE)
 # Remove people that have missing or strange time-to-event values (negative)
 df = df[!is.na(df$tte) & df$tte>0, ]
+#df = na.omit(df)
+rownames(df) = df$Sentrix_ID
 
 if (settings$transform == "rank") {
   df$assign = transform(df$assign)
@@ -47,10 +49,13 @@ if (settings$transform == "rank") {
   df$assign = log(df$assign + 1)
 }
 
-rownames(df) = df$Sentrix_ID
+#df$Troponin_T = log(df$Troponin_T+1)
+#df$Troponin_I = log(df$Troponin_I+1)
+#df$cTnI_corrected = log(df$cTnI_corrected+1)
+
 
 # Variables to keep: age, sex, grimage components, and 109 episcores (everything but dead status and tte, first two columns)
-x = subset(df, select = -c(Sentrix_ID, id, set, dead, event, assign, tte, Troponin_T, Troponin_I, cTnI_corrected))
+x = subset(df, select = -c(Sentrix_ID, id, age, sex, assign, set, dead, Troponin_T, Troponin_I, cTnI_corrected, event, tte))
 x = as.matrix(x)
 
 
@@ -74,22 +79,22 @@ write.csv(export_sum, paste0(settings$output, "export_sum_", settings$run, ".csv
 # Performance Check
 ######################################################
 
-x = df[c("age", "sex", "assign", "Troponin_T", "Troponin_I", "cTnI_corrected", "tte", "event")]
-x$summed_scores = export_sum$summed_scores
+x = df
+# x = merge(x, export_sum, by.x = "Sentrix_ID", by.y = "sample")
 
 riskFactorsOnlyCoxPH = coxph(Surv(tte, event) ~ age + sex, x)
 assignCoxPH = coxph(Surv(tte, event) ~ age + sex + assign, x)
-epiCoxPH = coxph(Surv(tte, event) ~ age + sex + summed_scores, x)
-proteinCoxPH = coxph(Surv(tte, event) ~ age + sex + assign + summed_scores, x)
+epiCoxPH = coxph(Surv(x$tte, x$event) ~ x$age + x$sex + x[["4498-62"]] + x[["3235-50"]] + x[["5034-79"]] + x[["2658-27"]] + x[["4337-49"]])
+proteinCoxPH = coxph(Surv(x$tte, x$event) ~ x$age + x$sex + x[["4498-62"]] + x[["3235-50"]] + x[["5034-79"]] + x[["2658-27"]] + x[["4337-49"]] + x$assign)
 
 models = list(r = riskFactorsOnlyCoxPH, a = assignCoxPH, e = epiCoxPH, f = proteinCoxPH)
 
 # GENERATE INCREMENTAL R2
 
+
 predictCoxPHOnset <- function(dataDF, coxPHModel, threshold = 10) {
   uniqueTimes <- sort(unique(dataDF$tte))
-  closest <- as.integer(uniqueTimes)
-  thresholdIndex <- match(threshold, closest)
+  thresholdIndex <- match(threshold, uniqueTimes)
   cumulativeBaseHaz <- gbm::basehaz.gbm(dataDF$tte, dataDF$event, predict(coxPHModel), uniqueTimes)
   survivalPredictions <- exp(-cumulativeBaseHaz[[thresholdIndex]]) ^ exp(predict(coxPHModel))# check what this is doing
   onsetPredictions <- 1 - survivalPredictions
@@ -110,12 +115,11 @@ predictCoxPHOnset <- function(dataDF, coxPHModel, threshold = 10) {
 }
 
 threshold = 10
-
 testResults <- lapply(models, function(m) {predictCoxPHOnset(x, m, threshold)})
 
 rocs <- sapply(testResults, function(r) {r$roc})
 
-pdf(file=paste0(settings$output, "AUC_", threshold, ".pdf"))
+pdf(file=paste0(settings$output, "AUC_ordered_by_significance", threshold, ".pdf"))
 
 plot(1-rocs[['specificities', 'r']], rocs[['sensitivities', 'r']], type = "l", xlab="False Positives", ylab = "True Postives", col = "black")
 lines(1-rocs[['specificities', 'e']], rocs[['sensitivities', 'e']], type = "l", col = "red")
@@ -130,4 +134,5 @@ aucs <- sapply(testResults, function(r) {r$auc})
 praucs <- sapply(testResults, function(r) {r$prauc})
 metricsTable <- data.frame(AUC = aucs, PRAUC = praucs)
 
-write.table(metricsTable, paste0(settings$output, "metricsTable_", threshold, "_AUC.txt"), quote = F)
+write.table(metricsTable, paste0(settings$output, "metricsTable_ordered_by_significance_", threshold, "_AUC.txt"), quote = F)
+

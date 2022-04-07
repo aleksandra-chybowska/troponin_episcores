@@ -1,6 +1,37 @@
 library(dplyr)
 
-box::use(../../modules/cox[...])
+#box::use(../../modules/cox[...])
+make_cox_dataset = function(ds) {
+  
+  ds[which(is.na(ds$mob)), "mob"] = 1
+  # there is another file - targets file - where this has been corrected
+  
+  ds$dead = 0
+  # add natural deaths
+  ds[which(!is.na(ds$dod_ym)), "dead"] = 1
+  
+  #check for multiple events!!!
+  ds$event = 0
+  ds[which(!is.na(ds$Incident.Event)), "event"] = 1
+  
+  # year and month of event
+  ds$yoe = as.numeric(substring(ds$Event_Date.Event, 1, 4))
+  ds$moe = as.numeric(substring(ds$Event_Date.Event, 5, 6))
+  
+  # year and month of death
+  ds$yod = as.numeric(substring(ds$Event_Date.Death, 1, 4))
+  ds$mod = as.numeric(substring(ds$Event_Date.Death, 5, 6))
+  
+  #censoring
+  ds$yr_diff = ifelse(ds$event==0, 2019 - ds$yob, ds$yoe - ds$yob)
+  ds$m_diff = ifelse(ds$event==0, ((9 - ds$mob)/12), ((ds$moe - ds$mob)/12))
+  ds$age_event = ds$yr_diff + ds$m_diff
+  ds$tte = ds$age_event - ds$age
+  ds$tte = ifelse(ds$tte < -1, NA, ds$tte)
+  ds$tte = ifelse(ds$tte < 0, 0, ds$tte)
+  
+  return(ds)
+}
 
 ####################################### Input data #######################################
 
@@ -10,7 +41,7 @@ cvd_deaths = read.csv('/Volumes/marioni-lab/Ola/Lab/Cox/2022-01-18/cvd_deaths_wi
 non_cvd_deaths = read.csv('/Volumes/marioni-lab/Generation_Scotland_data_Sep2021/2021-09-27_death.csv');
 hosp_events = read.csv('/Volumes/marioni-lab/Ola/Lab/Cox/2022-01-18/cvd_hospitalisations_and_operations_withcode.csv') # 3666
 assign =  read.csv('/Volumes/marioni-lab/Ola/Lab/ASSIGN/GS_assign_data.csv')
-target = read.csv('/Volumes/marioni-lab/Ola/Lab/Test_sets/gs20ktargets.tsv', sep='\t')
+target = readRDS("/Volumes/marioni-lab/Ola/Lab/Test_sets/GS20k_Targets.rds")
 
 ####################################### CVD subsets #######################################
 
@@ -23,19 +54,19 @@ main_ds = assign %>%
   left_join(non_cvd_deaths, c("id" = "id")) %>%
   left_join(cvd_deaths, c("id" = "id"))
 
-main_ds = main_ds[which(!is.na(main_ds$age.y)),]
-
 ds = main_ds %>% left_join(events, c("id" = "id"))
 
-ds = ds[c("id", "ID", "sex.x", "age.y", "assign", "Set", "yob", "mob", "dod_ym", 
+ds = ds[c("id", "Sample_Sentrix_ID", "sex.x", "age.x", "assign", "Troponin_T", "Troponin_I", "cTnI_corrected", "Set", "yob", "mob", "dod_ym", 
             "Incident.x", "Event_Type.x", "Event_Date.x", "Incident.y", "Event_Type.y", "Event_Date.y")] 
-colnames(ds) = c("id", "Sentrix_ID", "sex", "age", "assign", "set", "yob", "mob", "dod_ym", 
+colnames(ds) = c("id", "Sentrix_ID", "sex", "age", "assign", "Troponin_T", "Troponin_I", "cTnI_corrected", "set", "yob", "mob", "dod_ym", 
                  "Incident.Death", "Event_Type.Death", "Event_Date.Death", "Incident.Event", "Event_Type.Event", "Event_Date.Event")
 
 
 ####################################### Cox dataset #######################################
 
 cox = make_cox_dataset(ds)
-cox = cox[c("id", "Sentrix_ID", "sex", "age", "assign", "set", "dead", "event", "tte")] 
-cox = subset(cox, !is.na(tte) & tte>0)
-write.csv(cox, '/Volumes/marioni-lab/Ola/Lab/EpiScores/Cox_episcores_composite/cox_covars.csv', row.names = F)
+cox = cox[c("id", "Sentrix_ID", "sex", "age", "assign", "Troponin_T", "Troponin_I", "cTnI_corrected", "set", "dead", "event", "tte")] 
+cox = subset(cox, !is.na(tte) & tte>0 & tte<20)
+cox = subset(cox, !is.na(assign))
+
+write.csv(cox, '/Volumes/marioni-lab/Ola/Lab/EpiScores/Cox_episcores_composite/runs/episcores_only_13k_na_corrected/train/cox_covars.csv', row.names = F)

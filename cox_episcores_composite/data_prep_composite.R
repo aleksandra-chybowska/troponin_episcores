@@ -3,9 +3,9 @@ library(parallel)
 
 box::use(../../modules/transformations[...])
 
-cox = read.csv('/Volumes/marioni-lab/Ola/Lab/EpiScores/Cox_episcores_composite/cox_covars.csv')
+cox = read.csv('/Volumes/marioni-lab/Ola/Lab/EpiScores/Cox_episcores_composite/runs/episcores_only_13k_na_corrected/train/cox_covars.csv')
 min_set = subset(cox, !is.na(tte) & tte>0)
-min_set = na.omit(min_set)
+min_set = subset(min_set, !is.na(assign))
 
 episcores_w1_w3 = read.csv('/Volumes/marioni-lab/Ola/Lab/EpiScores/Protein_projections/EpiScore_projections_GS_9537.csv', check.names = FALSE)
 episcores_w4 = read.csv('/Volumes/marioni-lab/Ola/Lab/EpiScores/Protein_projections/EpiScore_projections_W4_8877_220221.csv', check.names = FALSE)
@@ -37,5 +37,5 @@ W1[start:end] = mclapply(W1[start:end], transform)
 head(W1[,100:ncol(W1)])
 head(W1[,1:10])
 
-write.csv(W1, '/Volumes/marioni-lab/Ola/Lab/EpiScores/Cox_episcores_composite/cox_covars_episcores_W1.csv', row.names = F)
-write.csv(W3_W4, '/Volumes/marioni-lab/Ola/Lab/EpiScores/Cox_episcores_composite/cox_covars_episcores_W3_W4.csv', row.names = F)
+write.csv(W1, '/Volumes/marioni-lab/Ola/Lab/EpiScores/Cox_episcores_composite/runs/episcores_only_13k_na_corrected/train/cox_covars_episcores_W1.csv', row.names = F)
+write.csv(W3_W4, '/Volumes/marioni-lab/Ola/Lab/EpiScores/Cox_episcores_composite/runs/episcores_only_13k/train/cox_covars_episcores_W3_W4.csv', row.names = F)
