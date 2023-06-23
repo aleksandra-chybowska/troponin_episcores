@@ -16,7 +16,7 @@ option_list = list(
 opt_parser = OptionParser(option_list=option_list);
 opt = parse_args(opt_parser);
 
-url = '/Users/shirin/Projects/R/troponin_episcores/generic/settings/test_settings/settings_local.json'
+url = '/Cluster_Filespace/Marioni_Group/Ola/Code/general/toolbox/troponin_episcores/episcores_using_biglasso/settings/cTnI_corrected_outliers.json'
 
 if (!is.null(opt$settings)) {
   url = opt$settings
@@ -45,7 +45,7 @@ for(dataset in train_datasets) {
   cat("\n")
 }
 
-target = read.csv(settings$target, sep='\t')
+target = readRDS(settings$target)
 unique = read.csv(settings$cpg_subset)
 pheno = read.csv(settings$pheno)
 feature = settings$feature
@@ -69,8 +69,9 @@ transform <- function(x) {
 cat("\n#### Remove related - train:\n")
 unrelated = unique %>% left_join(target, by="Sample_Name")
 
+
 for(dataset in train_datasets) {
-    train[[dataset]] = train[[dataset]][,colnames(train[[dataset]]) %in% unrelated$ID]
+    train[[dataset]] = train[[dataset]][,colnames(train[[dataset]]) %in% unrelated$Sample_Sentrix_ID]
     cat(paste(dataset, "\n", sep = ""))
     cat(paste("\t", dim(train[[dataset]])))
     cat("\n")
@@ -99,7 +100,7 @@ for(train_ids in settings$train_identifiers) {
   pheno_train[[train_ids]] = subset(pheno, pheno$set == train_ids)
 }
 pheno_train = do.call("rbind", pheno_train)
-pheno_train = pheno_train[pheno_train$Sample_Sentrix_ID %in% unrelated$ID,]
+pheno_train = pheno_train[pheno_train$Sample_Sentrix_ID %in% unrelated$Sample_Sentrix_ID,]
 
 cat("Train after filtering:\n")
 cat(paste("\t", dim(pheno_train)))
@@ -109,7 +110,6 @@ for(test_ids in settings$test_identifiers) {
   pheno_test[[test_ids]] = subset(pheno, pheno$set == test_ids)
 }
 
-#SPRAWDZIC!
 pheno_test = do.call("rbind", pheno_test)
 
 cat("Test after filtering:\n")
@@ -248,13 +248,13 @@ identical(pheno_test$Sample_Sentrix_ID, rownames(test_df))
 cat("\nRAM clean up...\n\n")
 gc()
 # > dim(train_df)
-# [1] 9846  713
+# [1]   9782 395380
 # > dim(test_df)
-# [1] 5080  713
+# [1]   5027 395380
 # > dim(pheno_train)
-# [1] 9846    6
+# [1] 9782    6
 # > dim(pheno_test)
-# [1] 5080    6
+# [1] 5027    6
 
 
 # Export data
@@ -270,3 +270,4 @@ saveRDS(test_df, settings$o_test_df, compress = FALSE) # cpgs
 
 sink()
 
+/Cluster_Filespace/Marioni_Group/Ola/Code/general/toolbox/troponin_episcores/episcores_using_biglasso/data_prep.R

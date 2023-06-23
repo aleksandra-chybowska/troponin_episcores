@@ -22,7 +22,9 @@ transform <- function(x) {
 troponin_levels = read.csv('/Volumes/marioni-lab/Generation_Scotland_data/Troponin/GS20K_Troponin_all.PHE', sep='\t');
 troponin_levels = subset(troponin_levels, !(is.na(Troponin_T) & is.na(Troponin_I)))
 # troponin I
-count(subset(troponin_levels, !is.na(Troponin_I))) # 19129
+count(subset(troponin_levels, !is.na(Troponin_I))) # 19130
+dim(subset(troponin_levels, !is.na(Troponin_I)))
+dim(subset(troponin_levels, !is.na(Troponin_T)))
 count(subset(troponin_levels, !is.na(Troponin_I) & Troponin_I <1.2)) # 4815
 
 troponin_levels$cTnI_corrected = troponin_levels$Troponin_I
@@ -182,4 +184,4 @@ for(i in c(5:12)){
 #   print(cor(tmp8[,i], tmp9[,i], use="pairwise.complete.obs"))
 # }
 
-
+/Users/shirin/Projects/R/general/troponin_episcores/episcores_using_biglasso/prepare-pheno-2022.R 

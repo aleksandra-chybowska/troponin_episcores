@@ -27,7 +27,7 @@ opt_parser = OptionParser(option_list=option_list);
 opt = parse_args(opt_parser);
 
 #url = '/Cluster_Filespace/Marioni_Group/Ola/Code/troponin_episcores/generic/settings/sys_bp.json'
-url = '/Users/shirin/Projects/R/troponin_episcores/generic/settings/test_settings/settings_local.json'
+url = '/Cluster_Filespace/Marioni_Group/Ola/Code/general/toolbox/troponin_episcores/episcores_using_biglasso/settings/cTnI_corrected_outliers.json'
 
 if (!is.null(opt$settings)) {
   url = opt$settings

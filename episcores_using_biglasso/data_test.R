@@ -18,7 +18,7 @@ option_list = list(
 opt_parser = OptionParser(option_list=option_list);
 opt = parse_args(opt_parser);
 
-url = '/Users/shirin/Projects/R/troponin_episcores/generic/settings/test_settings/settings_local.json'
+url = '/Cluster_Filespace/Marioni_Group/Ola/Code/general/toolbox/troponin_episcores/episcores_using_biglasso/settings/cTnI_corrected_outliers.json'
 
 if (!is.null(opt$settings)) {
   url = opt$settings
@@ -81,7 +81,7 @@ cat("\nObtained predictions! Exporting...\n")
 ######################################################
 
 # Output table
-write.csv(pred_df, file = paste0(output_dir, "episcores_", settings$feature, ".csv"), row.names = FALSE)
+write.csv(pred_df, file = paste0(settings$o_dir, "episcores_", settings$feature, ".csv"), row.names = FALSE)
 
 # Performance Check
 ######################################################
@@ -102,4 +102,7 @@ print('full R2')
 print(full)
 
 results <- data.frame("trait" = settings$feature, "null_R2" = null, "full_R2" = full, "incremental_R2" = round(100*(full - null), 3))
-write.csv(results, file = paste0(output_dir, "results_", settings$feature, ".csv"), row.names = FALSE)
+
+summary(lm(pheno ~ age + sex + episcore, data=join))
+
+write.csv(results, file = paste0(settings$o_dir, "results_", settings$feature, ".csv"), row.names = FALSE)
